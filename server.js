@@ -38,27 +38,23 @@ app.post("/api/chat", async (req, res) => {
   const { messages } = req.body;
 
   try {
-    // Send messages to HuggingFace API
     const chatResponse = await hfClient.chatCompletion({
-      model: "meta-llama/Meta-Llama-3-8B-Instruct", // Or any other model
+      model: "meta-llama/Meta-Llama-3-8B-Instruct",
       messages,
       max_tokens: 3000,
     });
 
-    // Clean and format the AI's reply
     const rawReply = chatResponse.choices[0].message.content;
     const formattedReply = rawReply.trim().replace(/\n{2,}/g, "\n\n");
 
-    // Add the AI's reply to the conversation
     const updatedMessages = [
       ...messages,
       { role: "assistant", content: formattedReply },
     ];
 
-    // Save the conversation to Firebase
-    const chatId = `chat_${Date.now()}`; // Unique ID for each chat session
+    const chatId = `chat_${Date.now()}`;
     await db.collection("conversations").doc(chatId).set({
-      title: "Untitled Chat", // Default title
+      title: "Untitled Chat",
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
       messages: updatedMessages,
     });
@@ -75,13 +71,31 @@ app.get("/api/chats", async (req, res) => {
   try {
     const chatsSnapshot = await db.collection("conversations").get();
     const chats = chatsSnapshot.docs.map((doc) => ({
-      id: doc.id, // Document ID
-      ...doc.data(), // Document fields
+      id: doc.id,
+      ...doc.data(),
     }));
-    res.json(chats); // Send the chats list to the frontend
+    res.json(chats);
   } catch (error) {
     console.error("Error fetching chats:", error);
     res.status(500).json({ error: "Failed to fetch chats." });
+  }
+});
+
+// Update chat title
+app.patch("/api/chats/:id", async (req, res) => {
+  const { id } = req.params;
+  const { title } = req.body;
+
+  if (!title.trim()) {
+    return res.status(400).json({ error: "Title cannot be empty." });
+  }
+
+  try {
+    await db.collection("conversations").doc(id).update({ title });
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error updating chat title:", error);
+    res.status(500).json({ error: "Failed to update chat title." });
   }
 });
 
