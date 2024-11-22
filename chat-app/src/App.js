@@ -11,9 +11,11 @@ const App = () => {
   const [chats, setChats] = useState([]); // Store chat list
 
   const API_URL =
-    process.env.REACT_APP_API_URL || "http://localhost:5000/api/chat";
+    process.env.REACT_APP_API_URL ||
+    "https://liama-chat-back-end.onrender.com/api/chat";
   const CHAT_API_URL =
-    process.env.REACT_APP_CHAT_API_URL || "http://localhost:5000/api/chats";
+    process.env.REACT_APP_CHAT_API_URL ||
+    "https://liama-chat-back-end.onrender.com/chats";
 
   useEffect(() => {
     fetchChats(); // Fetch chats on component load
