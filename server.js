@@ -23,7 +23,7 @@ if (!admin.apps.length) {
 const db = admin.firestore();
 
 const app = express();
-app.use(cors());
+app.use(cors({ origin: "*" }));
 app.use(bodyParser.json());
 
 const hfClient = new HfInference(process.env.HUGGINGFACE_API_KEY);
